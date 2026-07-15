@@ -36,49 +36,74 @@ async function run() {
       res.send("App is running");
     });
 
-    app.get("/games", async(req: Request, res:Response) => {
+    app.get("/games", async (req: Request, res: Response) => {
       const games = await gamesCollection.find().toArray();
       res.json(games);
-    })
+    });
 
-    app.get("/games/:id", async(req: Request<{ id: string }>, res:Response) => {
-      const { id } = req.params;
-      
-      const game = await gamesCollection.findOne({
-        _id: new ObjectId(id),
-      });
+    app.get(
+      "/games/:id",
+      async (req: Request<{ id: string }>, res: Response) => {
+        const { id } = req.params;
 
-      res.json(game);
-    })
+        const game = await gamesCollection.findOne({
+          _id: new ObjectId(id),
+        });
+
+        res.json(game);
+      },
+    );
 
     app.post("/add-games", async (req: Request, res: Response) => {
       const data = req.body;
       const ret = await gamesCollection.insertOne(data);
 
       res.json(ret);
-    })
-
-    app.delete("/games/delete/:id", async (req: Request<{ id: string }> , res: Response) => {
-      const { id } = req.params;
-
-      const result = await gamesCollection.deleteOne({
-        _id: new ObjectId(id),
-      });
-
-      if (result.deletedCount === 1) {
-        return res.json({
-          success: true,
-          message: "Game deleted successfully",
-        });
-      }
     });
+
+    app.delete(
+      "/games/delete/:id",
+      async (req: Request<{ id: string }>, res: Response) => {
+        const { id } = req.params;
+
+        const result = await gamesCollection.deleteOne({
+          _id: new ObjectId(id),
+        });
+
+        if (result.deletedCount === 1) {
+          return res.json({
+            success: true,
+            message: "Game deleted successfully",
+          });
+        }
+      },
+    );
+
+    app.get("/slot/", async (req: Request<{ id: string }>, res: Response) => {
+      const slotsDetails = await slotCollection.find().toArray();
+      res.json(slotsDetails);
+    });
+
+    app.get(
+      "/slot/:id",
+      async (req: Request<{ id: string }>, res: Response) => {
+        const { id } = req.params;
+        const slotsDetails = await slotCollection
+          .find({
+            userId: id,
+          })
+          .toArray();
+
+        res.json(slotsDetails);
+      },
+    );
 
     app.post("/slot/book", async (req: Request, res: Response) => {
       const slotDetails = req.body;
       const ret = await slotCollection.insertOne(slotDetails);
 
       res.json(ret);
-    })
+    });
 
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
