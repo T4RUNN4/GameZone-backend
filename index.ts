@@ -105,6 +105,24 @@ async function run() {
       res.json(ret);
     });
 
+    app.patch(
+      "/slot/update-status/:id",
+      async (
+        req: Request<{ id: string }, {}, { status: string }>,
+        res: Response,
+      ) => {
+        const { id } = req.params;
+        const { status } = req.body;
+
+        const result = await slotCollection.updateOne(
+          { _id: new ObjectId(id) },
+          { $set: { status } },
+        );
+
+        res.send(result);
+      },
+    );
+
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });
