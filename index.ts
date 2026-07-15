@@ -71,6 +71,13 @@ async function run() {
           message: "Game deleted successfully",
         });
       }
+    });
+
+    app.post("/slot/book", async (req: Request, res: Response) => {
+      const slotDetails = req.body;
+      const ret = await slotCollection.insertOne(slotDetails);
+
+      res.json(ret);
     })
 
     app.listen(PORT, () => {
