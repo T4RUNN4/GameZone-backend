@@ -48,6 +48,21 @@ async function run() {
       res.json(ret);
     })
 
+    app.delete("/games/delete/:id", async (req: Request<{ id: string }> , res: Response) => {
+      const { id } = req.params;
+
+      const result = await gamesCollection.deleteOne({
+        _id: new ObjectId(id),
+      });
+
+      if (result.deletedCount === 1) {
+        return res.json({
+          success: true,
+          message: "Game deleted successfully",
+        });
+      }
+    })
+
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });
