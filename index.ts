@@ -36,6 +36,13 @@ async function run() {
       res.send("App is running");
     });
 
+    app.post("/add-games", async (req: Request, res: Response) => {
+      const data = req.body;
+      const ret = await gamesCollection.insertOne(data);
+
+      res.json(ret);
+    })
+
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });
