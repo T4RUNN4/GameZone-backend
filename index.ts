@@ -41,6 +41,16 @@ async function run() {
       res.json(games);
     })
 
+    app.get("/games/:id", async(req: Request<{ id: string }>, res:Response) => {
+      const { id } = req.params;
+      
+      const game = await gamesCollection.findOne({
+        _id: new ObjectId(id),
+      });
+
+      res.json(game);
+    })
+
     app.post("/add-games", async (req: Request, res: Response) => {
       const data = req.body;
       const ret = await gamesCollection.insertOne(data);
