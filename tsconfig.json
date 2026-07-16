@@ -1,14 +1,14 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "CommonJS",
-    "moduleResolution": "Bundler",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
 
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
 
-    "rootDir": "./",
+    "rootDir": ".",
     "outDir": "./dist",
 
     "types": ["node"]
