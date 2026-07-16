@@ -123,11 +123,15 @@ async function run() {
       },
     );
 
-    app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
-    });
+    if (process.env.NODE_ENV !== "production") {
+      app.listen(PORT, () => {
+        console.log(`Server running on ${PORT}`);
+      });
+    }
+
   } finally {
   }
 }
 
+export default app;
 run().catch(console.dir);
