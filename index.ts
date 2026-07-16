@@ -15,7 +15,7 @@ app.use(
   }),
 );
 
-const PORT: number = Number(process.env.PORT!) || 5000;
+const PORT: number = Number(process.env.PORT!);
 const URI: string = process.env.MONGO_URI!;
 
 const client = new MongoClient(URI, {
@@ -26,94 +26,108 @@ const client = new MongoClient(URI, {
   },
 });
 
-const db = client.db("game-zone");
-const gamesCollection = db.collection("games");
-const slotCollection = db.collection("slots");
+async function run() {
+  try {
+    const db = client.db("game-zone");
+    const gamesCollection = db.collection("games");
+    const slotCollection = db.collection("slots");
 
-app.get("/", (req: Request, res: Response) => {
-  res.send("App is running on Vercel");
-});
-
-app.get("/games", async (req: Request, res: Response) => {
-  const games = await gamesCollection.find().toArray();
-  res.json(games);
-});
-
-app.get("/games/:id", async (req: Request<{ id: string }>, res: Response) => {
-  const { id } = req.params;
-  const game = await gamesCollection.findOne({
-    _id: new ObjectId(id),
-  });
-  res.json(game);
-});
-
-app.post("/add-games", async (req: Request, res: Response) => {
-  const data = req.body;
-  const ret = await gamesCollection.insertOne(data);
-  res.json(ret);
-});
-
-app.delete(
-  "/games/delete/:id",
-  async (req: Request<{ id: string }>, res: Response) => {
-    const { id } = req.params;
-    const result = await gamesCollection.deleteOne({
-      _id: new ObjectId(id),
+    app.get("/", (req: Request, res: Response) => {
+      res.send("App is running");
     });
 
-    if (result.deletedCount === 1) {
-      return res.json({
-        success: true,
-        message: "Game deleted successfully",
-      });
-    }
+    app.get("/games", async (req: Request, res: Response) => {
+      const games = await gamesCollection.find().toArray();
+      res.json(games);
+    });
 
-    res.status(404).json({ success: false, message: "Game not found" });
-  },
-);
+    app.get(
+      "/games/:id",
+      async (req: Request<{ id: string }>, res: Response) => {
+        const { id } = req.params;
 
-app.get("/slot/", async (req: Request, res: Response) => {
-  const slotsDetails = await slotCollection.find().toArray();
-  res.json(slotsDetails);
-});
+        const game = await gamesCollection.findOne({
+          _id: new ObjectId(id),
+        });
 
-app.get("/slot/:id", async (req: Request<{ id: string }>, res: Response) => {
-  const { id } = req.params;
-  const slotsDetails = await slotCollection
-    .find({
-      userId: id,
-    })
-    .toArray();
-  res.json(slotsDetails);
-});
-
-app.post("/slot/book", async (req: Request, res: Response) => {
-  const slotDetails = req.body;
-  const ret = await slotCollection.insertOne(slotDetails);
-  res.json(ret);
-});
-
-app.patch(
-  "/slot/update-status/:id",
-  async (
-    req: Request<{ id: string }, {}, { status: string }>,
-    res: Response,
-  ) => {
-    const { id } = req.params;
-    const { status } = req.body;
-
-    const result = await slotCollection.updateOne(
-      { _id: new ObjectId(id) },
-      { $set: { status } },
+        res.json(game);
+      },
     );
-    res.send(result);
-  },
-);
 
-if (process.env.NODE_ENV !== "production") {
-  app.listen(PORT, () => {
-    console.log(`Server running on ${PORT}`);
-  });
+    app.post("/add-games", async (req: Request, res: Response) => {
+      const data = req.body;
+      const ret = await gamesCollection.insertOne(data);
+
+      res.json(ret);
+    });
+
+    app.delete(
+      "/games/delete/:id",
+      async (req: Request<{ id: string }>, res: Response) => {
+        const { id } = req.params;
+
+        const result = await gamesCollection.deleteOne({
+          _id: new ObjectId(id),
+        });
+
+        if (result.deletedCount === 1) {
+          return res.json({
+            success: true,
+            message: "Game deleted successfully",
+          });
+        }
+      },
+    );
+
+    app.get("/slot/", async (req: Request<{ id: string }>, res: Response) => {
+      const slotsDetails = await slotCollection.find().toArray();
+      res.json(slotsDetails);
+    });
+
+    app.get(
+      "/slot/:id",
+      async (req: Request<{ id: string }>, res: Response) => {
+        const { id } = req.params;
+        const slotsDetails = await slotCollection
+          .find({
+            userId: id,
+          })
+          .toArray();
+
+        res.json(slotsDetails);
+      },
+    );
+
+    app.post("/slot/book", async (req: Request, res: Response) => {
+      const slotDetails = req.body;
+      const ret = await slotCollection.insertOne(slotDetails);
+
+      res.json(ret);
+    });
+
+    app.patch(
+      "/slot/update-status/:id",
+      async (
+        req: Request<{ id: string }, {}, { status: string }>,
+        res: Response,
+      ) => {
+        const { id } = req.params;
+        const { status } = req.body;
+
+        const result = await slotCollection.updateOne(
+          { _id: new ObjectId(id) },
+          { $set: { status } },
+        );
+
+        res.send(result);
+      },
+    );
+
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
+  } finally {
+  }
 }
 
-export default app;
+run().catch(console.dir);
